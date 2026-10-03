@@ -1,0 +1,32 @@
+<!-- public/index.html -->
+<!-- Task 6 (2 pts): build this page. A worked HTML skeleton for a similar
+     page is in Lab Sheet 06, Section 10.3 -- use the same pattern here for
+     books instead of students. -->
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css" />
+    <title>Books</title>
+  </head>
+  <body>
+    <h1>Books</h1>
+
+    <!-- TODO: a <p id="message"></p> is a good place to show errors -->
+    <p id="message"></p>
+
+    <!-- TODO: an element (e.g. <ul id="list"></ul>) that main.js will fill
+       with one row per book: title, price, and a delete button -->
+    <ul id="list"></ul>
+
+    <!-- TODO: a <form id="form"> with inputs for title, author, price, and
+       a submit button that adds a new book -->
+    <form id="form">
+      <input id="title" placeholder="Title" />
+      <input id="author" placeholder="Author" />
+      <input id="price" type="number" step="0.01" placeholder="Price" />
+      <button type="submit">Add</button>
+    </form>
+
+    <script src="main.js"></script>
+  </body>
+</html>
