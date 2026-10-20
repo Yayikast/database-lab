@@ -8,8 +8,8 @@
 -- The foreign keys matter for Q4: an order that points to a customer or
 -- book that does not exist is REJECTED by the database.
 -- =====================================================================
-CREATE DATABASE IF NOT EXISTS bookstore_lab9;
-USE bookstore_lab9;
+CREATE DATABASE IF NOT EXISTS lab9_hw;
+USE lab9_hw;
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS orders;
