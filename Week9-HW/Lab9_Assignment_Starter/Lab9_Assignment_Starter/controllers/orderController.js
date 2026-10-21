@@ -33,15 +33,34 @@ exports.listForCustomer = async (req, res) => {
 // ---------------------------------------------------------------------
 exports.placeOrder = async (req, res) => {
   const customerId = req.params.id;
-  const { book_id, quantity } = req.body;
+  const bookId = Number(req.body.book_id);
+  const quantity = Number(req.body.quantity);
+
+  if (!Number.isInteger(bookId) || bookId <= 0 || !Number.isInteger(quantity) || quantity <= 0) {
+    return res.status(400).json({ error: 'book_id and quantity must be positive whole numbers' });
+  }
+
+  const conn = await pool.getConnection();
   try {
-    await pool.execute('UPDATE books SET stock = stock - ? WHERE id = ?', [quantity, book_id]);
-    const [r] = await pool.execute(
+    await conn.beginTransaction();
+    const [u] = await conn.execute(
+      'UPDATE books SET stock = stock - ? WHERE id = ? AND stock >= ?',
+      [quantity, bookId, quantity]);
+
+    if (u.affectedRows === 0) {
+      await conn.rollback();
+      return res.status(409).json({ error: 'not enough stock' });
+    }
+    const [r] = await conn.execute(
       'INSERT INTO orders (customer_id, book_id, quantity) VALUES (?, ?, ?)',
-      [customerId, book_id, quantity]);
+      [customerId, bookId, quantity]);
+    await conn.commit();
     res.status(201).json({ ok: true, order_id: r.insertId });
   } catch (err) {
+    await conn.rollback();
     res.status(500).json({ error: err.message });
+  } finally {
+    conn.release();
   }
 };
 
@@ -59,13 +78,40 @@ exports.placeOrder = async (req, res) => {
 //   5. commit and return 200
 // ---------------------------------------------------------------------
 exports.cancelOrder = async (req, res) => {
+  const customerId = req.params.id;
+  const orderId = req.params.orderId;
+
+  const conn = await pool.getConnection();
   try {
-    const [d] = await pool.execute(
-      'DELETE FROM orders WHERE id = ? AND customer_id = ?',
-      [req.params.orderId, req.params.id]);
-    if (d.affectedRows === 0) return res.status(404).json({ error: 'order not found' });
-    res.json({ ok: true });
+    await conn.beginTransaction();
+
+    // 1. look up the order
+    const [rows] = await conn.execute(
+      'SELECT book_id, quantity FROM orders WHERE id = ? AND customer_id = ?',
+      [orderId, customerId]);
+
+    // 2. no such order -> undo and 404
+    if (rows.length === 0) {
+      await conn.rollback();
+      return res.status(404).json({ error: 'order not found' });
+    }
+    const bookId = rows[0].book_id;
+    const quantity = rows[0].quantity;
+
+    // 3. delete the order
+    await conn.execute('DELETE FROM orders WHERE id = ?', [orderId]);
+
+    // 4. give the stock back
+    await conn.execute(
+      'UPDATE books SET stock = stock + ? WHERE id = ?',
+      [quantity, bookId]);
+
+    await conn.commit();
+    res.status(200).json({ ok: true });
   } catch (err) {
+    await conn.rollback();
     res.status(500).json({ error: err.message });
+  } finally {
+    conn.release();
   }
 };
