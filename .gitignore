@@ -1,3 +1,4 @@
 ﻿# Claude Code local settings
+# Added claude skill /teach-lab
 .claude/
-
+.env
