@@ -10,9 +10,9 @@
 -- The routines, triggers and the attributes JSON column are NOT created
 -- here - you write them in Q1-Q4 and Q6.
 -- =====================================================================
-DROP DATABASE IF EXISTS bookstore_lab11;
-CREATE DATABASE bookstore_lab11;
-USE bookstore_lab11;
+DROP DATABASE IF EXISTS lab11_hw;
+CREATE DATABASE lab11_hw;
+USE lab11_hw;
 
 CREATE TABLE books (
   id     INT           NOT NULL AUTO_INCREMENT,

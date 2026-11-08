@@ -45,40 +45,19 @@ exports.placeOrder = async (req, res) => {
       error: 'customer id, book_id and quantity must be positive integers' });
   }
 
-  const conn = await pool.getConnection();                 // borrow ONE connection
   try {
-    await conn.beginTransaction();                         // begin
-
-    // guarded UPDATE - only succeeds when enough stock is available
-    const [u] = await conn.execute(
-      'UPDATE books SET stock = stock - ? WHERE id = ? AND stock >= ?',
-      [quantity, bookId, quantity]);
-    if (u.affectedRows === 0) {
-      await conn.rollback();                               // rule broken -> undo
-      const [b] = await conn.execute('SELECT stock FROM books WHERE id = ?', [bookId]);
-      if (b.length === 0) return res.status(404).json({ error: 'book not found' });
-      return res.status(409).json({
-        error: `not enough stock: requested ${quantity}, available ${b[0].stock}`,
-      });
-    }
-
-    // record the order on the SAME connection
-    const [r] = await conn.execute(
-      'INSERT INTO orders (customer_id, book_id, quantity) VALUES (?, ?, ?)',
-      [customerId, bookId, quantity]);
-
-    await conn.commit();                                   // both, for good
-    res.status(201).json({ ok: true, order_id: r.insertId });
+    await pool.execute('CALL place_order(?, ?, ?)', [customerId, bookId, quantity]);
+    res.status(201).json({ ok: true });
   } catch (err) {
-    // any failure after the UPDATE (e.g. FK error on the INSERT) lands here
-    await conn.rollback();                                 // stock change undone
+    if (err.sqlState === '45000') {
+      return res.status(409).json({ error: err.sqlMessage });
+    }
     if (err.code === 'ER_NO_REFERENCED_ROW_2') {
-      return res.status(404).json({ error: 'customer not found - order rolled back' });
+      return res.status(404).json({ error: 'customer or book not found' });
     }
     res.status(500).json({ error: err.message });
-  } finally {
-    conn.release();                                        // ALWAYS
   }
+
 };
 
 // ---------------------------------------------------------------------
@@ -100,32 +79,15 @@ exports.cancelOrder = async (req, res) => {
     return res.status(400).json({ error: 'ids must be positive integers' });
   }
 
-  const conn = await pool.getConnection();
   try {
-    await conn.beginTransaction();
-
-    // 1. read the order (and lock the row) - it must belong to this customer
-    const [rows] = await conn.execute(
-      'SELECT book_id, quantity FROM orders WHERE id = ? AND customer_id = ? FOR UPDATE',
+    const [r] = await pool.execute(
+      'DELETE FROM orders WHERE id = ? AND customer_id = ?',
       [orderId, customerId]);
-    if (rows.length === 0) {
-      await conn.rollback();
+    if (r.affectedRows === 0) {
       return res.status(404).json({ error: 'order not found' });
     }
-    const { book_id: bookId, quantity } = rows[0];
-
-    // 2. delete the order
-    await conn.execute('DELETE FROM orders WHERE id = ?', [orderId]);
-
-    // 3. give the stock back
-    await conn.execute('UPDATE books SET stock = stock + ? WHERE id = ?', [quantity, bookId]);
-
-    await conn.commit();
-    res.json({ ok: true, order_id: orderId, book_id: bookId, restored: quantity });
+    res.json({ ok: true, order_id: orderId });
   } catch (err) {
-    await conn.rollback();
     res.status(500).json({ error: err.message });
-  } finally {
-    conn.release();
   }
 };

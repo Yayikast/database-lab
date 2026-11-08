@@ -2,3 +2,4 @@
 # Added claude skill /teach-lab
 .claude/
 .env
+docs/

@@ -16,8 +16,19 @@ const pool = require('../db');
 // ---------------------------------------------------------------------
 exports.list = async (req, res) => {
   try {
-    const [rows] = await pool.execute(
-      'SELECT id, title, author, price, stock FROM books ORDER BY id');
+    let sql = `SELECT id, title, author, price, stock,
+                      attributes->>'$.format' AS format,
+                      attributes->>'$.pages' AS pages
+                 FROM books`;
+    const params = [];
+
+    if (req.query.format) {
+      sql += " WHERE attributes->>'$.format' = ?";
+      params.push(req.query.format);
+    }
+
+    sql += ' ORDER BY id';
+    const [rows] = await pool.execute(sql, params);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });

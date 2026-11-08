@@ -9,7 +9,7 @@ const pool = require('../db');
 // ---------------------------------------------------------------------
 exports.list = async (req, res) => {
   try {
-    const [rows] = await pool.execute('SELECT id, name, email FROM customers ORDER BY id');
+    const [rows] = await pool.execute('SELECT id, name, email, order_count(id) AS orders FROM customers ORDER BY id');
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
