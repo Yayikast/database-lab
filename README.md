@@ -1,120 +1,134 @@
 # CSS326 Database Programming Laboratory
 
-My lab work for **CSS326 Database Programming Laboratory** at Sirindhorn International Institute of Technology (SIIT), Thammasat University. This is Year 3, Term 1 (2026).
+Lab work for **CSS326 Database Programming Laboratory** at Sirindhorn International Institute of Technology (SIIT), Thammasat University · **Aug – Nov 2026**
 
-Over the term the course goes from plain JavaScript to a full Node.js + Express + MySQL web app. Along the way it covers transactions, indexing, security, stored routines, triggers and JSON data.
+## Course summary
 
-## Overview
+Database programming for web applications, from relational design and SQL to a Node.js/Express REST API backed by MySQL.
 
-| Area | What's used |
+- **Design and SQL:** ER modelling, keys and constraints, many-to-many junction tables, joins, aggregation, subqueries and views.
+- **Application layer:** Express REST APIs with routers, controllers, a shared connection pool, input validation and correct HTTP status codes.
+- **Data integrity:** ACID transactions with commit/rollback and guarded updates, verified under concurrent requests.
+- **Security:** parameterised queries against SQL injection, least-privilege database users, and credentials kept in environment variables.
+- **Performance:** index design, validated with `EXPLAIN` on datasets of 100,000+ rows.
+- **Server-side logic:** stored procedures, functions, triggers and JSON columns.
+
+Each concept was applied twice: in class on a **university** schema (`students`, `courses`, `enrolments`), then independently on a **bookstore** schema (`books`, `customers`, `orders`) as the weekly assignment.
+
+| Area | Tools |
 |---|---|
-| Language | JavaScript (Node.js, CommonJS) |
-| Database | MySQL 8, designed and queried in MySQL Workbench |
-| DB driver | [`mysql2/promise`](https://www.npmjs.com/package/mysql2) |
-| Web server | [Express](https://expressjs.com/) |
-| Front-end | Static HTML/CSS/JS calling the API with `fetch()` |
-| Testing APIs | Browser, `curl`, `requests.http` (VS Code REST Client) / Postman |
-
-Two example databases come back again and again:
-
-- **University** (in-class exercises): `students`, `courses`, `enrolments`. This is a many-to-many relationship that goes through the `enrolments` junction table.
-- **Bookstore** (homework assignments): `books`, `customers`, `orders`.
-
-So most weeks follow the same pattern: learn a concept on the university schema in class, then apply it on your own to the bookstore schema in the homework.
-
-### Learning path
+| Language | JavaScript (Node.js) |
+| Database | MySQL 8, MySQL Workbench (EER modelling, queries, `EXPLAIN`) |
+| Back-end | Express, [`mysql2/promise`](https://www.npmjs.com/package/mysql2), `dotenv` |
+| Front-end | HTML/CSS/JS with `fetch()` and the DOM |
+| API testing | Browser, `curl`, VS Code REST Client (`requests.http`) |
 
 ```
 JS basics → data modelling (ERD) → SQL CRUD & queries → Node ↔ MySQL
-   → Express REST API → MVC structure (routers/controllers/pool)
-   → related data (JOINs, nested routes) → transactions
+   → Express REST API → routers / controllers / pool → SQL practice
+   → related data (JOINs, views, nested routes) → transactions
    → performance & security → stored routines, triggers & JSON
 ```
-
-## Repository layout
-
-Each week has two folders:
-
-- `WeekN/` holds the in-class lab exercises.
-- `WeekN-HW/` holds the homework (lab assignment) for that week.
-
-Later weeks also include the lab sheet PDFs and the instructor's starter project. Each starter comes as a `.zip` and as an extracted folder, and each starter has its own `README.md` with setup steps and a route table.
-
-There are no Week 7 folders, and Week 8 has no `-HW` folder.
 
 ## Week by week
 
 ### Week 1: JavaScript fundamentals
-- **Lab** ([Week1/](Week1/)): first Node script, variables, `if/else` grading, `for` loops, a `setInterval` countdown, catching a `TypeError` with `try/catch`, and a small in-memory student "database" using array methods (`push`, `find`, `filter`).
-- **HW** ([Week1-HW/](Week1-HW/)): nine small tasks (`task1.js` … `task9.js`), including template strings, functions, a times table and a countdown.
+- Variables, `if/else`, loops, functions, arrow functions and template strings.
+- Array methods (`push`, `find`, `filter`) on a small in-memory student list.
+- Timers with `setInterval`, and handling errors with `try/catch`.
+- Work: [Week1/](Week1/), [Week1-HW/](Week1-HW/) (nine small tasks)
 
-### Week 2: Data modelling in MySQL Workbench
-- **Lab** ([Week2/](Week2/)): designing a first schema (`students`, `course`, `enrollments`) and exporting it as a SQL dump.
-- **HW** ([Week2-HW/](Week2-HW/)): an EER model built in MySQL Workbench (`.mwb`).
+### Week 2: Data modelling
+- Turning requirements into an **ER diagram**: entities, attributes, primary and foreign keys.
+- 1:N and M:N relationships, and why M:N needs a **junction table**.
+- Building the model in MySQL Workbench and exporting it as SQL.
+- Work: [Week2/](Week2/), [Week2-HW/](Week2-HW/) (EER model, `.mwb`)
 
-### Week 3: SQL CRUD & querying
-- **Lab** ([Week3/](Week3/)): `CREATE TABLE`, `INSERT`/`UPDATE`/`DELETE`, filtering and sorting, `GROUP BY` / `HAVING`, and `JOIN`s across students, courses and enrolment.
-- **HW** ([Week3-HW/](Week3-HW/)): the **bookstore** schema with foreign keys from `orders` to `customers` and `books`, plus CRUD and query tasks and an ER diagram.
+### Week 3: SQL CRUD and queries
+- `CREATE TABLE` with constraints: `PRIMARY KEY`, `FOREIGN KEY`, `NOT NULL`, `UNIQUE`.
+- `INSERT`, `UPDATE` and `DELETE`, and why a `WHERE` clause matters.
+- Filtering, sorting, `GROUP BY` / `HAVING` with aggregates, and `JOIN`s across tables.
+- Work: [Week3/](Week3/), [Week3-HW/](Week3-HW/) (bookstore schema + ER diagram)
 
 ### Week 4: Connecting Node.js to MySQL
-- **Lab** ([Week4/](Week4/)): `mysql2/promise` connections, `SELECT`, parameterised queries with `?` placeholders (`execute`), reading `insertId` and `affectedRows`, and cleaning up with `try/catch/finally` and `conn.end()`.
-- **HW** ([Week4-HW/](Week4-HW/)): the same ideas on the bookstore database (`ex1` … `ex8`). `ex8.js` combines every task into one script.
+- Opening connections with `mysql2/promise` and `async/await`.
+- **Parameterised queries** with `?` placeholders instead of building SQL strings.
+- Reading `insertId` and `affectedRows`, and closing connections in `finally`.
+- Work: [Week4/](Week4/), [Week4-HW/](Week4-HW/) (`ex1` … `ex8`)
 
-### Week 5: Building a REST API with Express
-- **Lab** ([Week5/](Week5/)): first Express routes (`GET /`, `/hello`, `/data`), `GET /students` and `GET /students/:id` from MySQL, `POST` with `express.json()`, and serving a static front-end from `public/`.
-- **HW** ([Week5-HW/](Week5-HW/)): a bookstore API in a single `app.js`, with list/search/create routes plus a simple HTML page.
+### Week 5: REST APIs with Express
+- How HTTP works: URLs, methods (GET/POST/PUT/DELETE) mapped to CRUD, JSON responses.
+- Express routes, `req.params` vs `req.query` vs `req.body`, and middleware (`express.json()`, `express.static`).
+- Serving a static front-end that calls the API with `fetch()`.
+- Work: [Week5/](Week5/), [Week5-HW/](Week5-HW/) (bookstore API)
 
 ### Week 6: Structuring a full-stack CRUD app
-- **Lab** ([Week6/](Week6/), lab sheet: `CSS326-Lab 6.pdf`): separation of concerns, a shared **connection pool** (`db.js`), **routers** and **controllers**, input validation returning `400`, full CRUD with `PUT`/`DELETE`, and a front-end that lists, adds and deletes with `fetch()`.
-- **HW** ([Week6-HW/](Week6-HW/), `CSS326-Lab_Assignment_06.pdf`): the same structure on the bookstore. Tasks cover `getOne` (with 404), `create` (validation), `update`, `remove`, and the front-end.
+- **Separation of concerns**: `db.js` (connection pool), `routes/`, `controllers/`, `public/`.
+- Full CRUD, with input validation before touching the database.
+- Returning the right status codes: `200`, `201`, `204`, `400`, `404` and `500`.
+- A front-end that lists, adds and deletes records and refreshes the page data.
+- Work: [Week6/](Week6/), [Week6-HW/](Week6-HW/)
+
+### Week 7: SQL practice
+- SQL command types: DDL (structure), DML (data), DCL (permissions) and TCL (transactions).
+- `DISTINCT`, `LIMIT`, `BETWEEN`, `LIKE`, `CONCAT`, and handling `NULL` correctly with `IS NULL`.
+- Practiced in MySQL Workbench; no folder in this repository.
 
 ### Week 8: Working with related data
-- **Lab** ([Week8/](Week8/), `CSS326-Lab_Sheet_08.pdf`): multi-table `JOIN`s, `LEFT JOIN` with `GROUP BY`, subqueries (`IN` / `NOT IN`), **views**, nested resource routes such as `/students/:id/courses`, turning flat JOIN rows into nested JSON, and adding/removing many-to-many links safely. Includes the official answer key (`Lab8_Exercise_Answer_Key.pdf`, `Lab8_Exercise_Solution.zip`).
+- Multi-table `JOIN`s, and `LEFT JOIN` + `GROUP BY` to include rows with zero matches.
+- Subqueries with `IN` / `NOT IN`, and **views** to save common queries.
+- Nested API routes such as `/students/:id/courses`, with flat JOIN rows turned into nested JSON.
+- Adding and removing many-to-many links safely (`409` for duplicates).
+- Work: [Week8/](Week8/)
 
 ### Week 9: Transactions
-- **Lab** ([Week9/](Week9/), `CSS326-Lab_9.pdf`, `CSS326-Lab_Sheet_09.pdf`): course enrolment with limited `seats`. The steps are: rewrite enrol/un-enrol as atomic transactions (`getConnection` → `beginTransaction` → guarded `UPDATE … AND seats > 0` → `INSERT` → `commit`, with `rollback` on error and `release` in `finally`); return `201` / `409` / `500`; then prove it works with a "last-seat race" script (`npm run race`).
-- **HW** ([Week9-HW/](Week9-HW/), `CSS326-Lab_Assignment_09.pdf`): bookstore orders that decrease `stock` atomically. You place and cancel orders as transactions in `orderController.js`. Q1 is done in Workbench.
+- **ACID** and why a multi-step change has to succeed or fail as one unit.
+- The transaction pattern in Node: `getConnection` → `beginTransaction` → `commit`, with `rollback` on error and `release` in `finally`.
+- Guarded updates (`UPDATE … WHERE seats > 0`) to prevent overselling, verified with a concurrent "last-seat race" script.
+- Work: [Week9/](Week9/), [Week9-HW/](Week9-HW/) (orders that reduce book stock atomically)
 
-### Week 10: Performance & security
-- **Lab** ([Week10/](Week10/), `CSS326-Lab_10.pdf`, `CSS326-Lab_Sheet_10.pdf`): runs on 100,000 extra test rows. Topics:
-  1. **Indexes and `EXPLAIN`**: measuring search speed before and after adding an index.
-  2. **Least privilege**: a dedicated `university_app` MySQL user instead of root.
-  3. **SQL injection**: replacing string-built SQL with `?` placeholders, moving credentials into `.env` with `dotenv`, and returning clean error messages.
-  4. **Query tuning.**
-- **HW** ([Week10-HW/](Week10-HW/), `CSS326-Lab_Assignment_10.pdf`): the same on a bulk bookstore (50k books, 100k orders). Covers indexing the author search, `EXPLAIN` on a join (Q1–Q3), fixing injection (Q5), and an app user plus `.env` (Q6–Q7).
+### Week 10: Performance and security
+- **Indexes**: measuring a search before and after with `EXPLAIN`, and which conditions stop an index from being used.
+- **SQL injection**: seeing an attack work on string-built SQL, then fixing it with placeholders.
+- **Least privilege**: a dedicated app user with only the permissions it needs, instead of `root`.
+- Keeping credentials in `.env` with `dotenv`, and returning clean error messages.
+- Work: [Week10/](Week10/), [Week10-HW/](Week10-HW/) (bookstore with 50k books and 100k orders)
 
-### Week 11: Stored routines, triggers & NoSQL
-- **Lab** ([Week11/](Week11/)):
-  - A stored procedure `enrol_student`, a function `course_count`, and an `OUT` parameter.
-  - `AFTER INSERT` / `AFTER DELETE` triggers that keep `courses.seats` up to date and `SIGNAL 'course is full'`.
-  - Updating the app to `CALL` the procedure, so a seat isn't taken twice.
-  - A **JSON column** for course details, with filtering by day.
-  - Optionally, a document store for course reviews.
-- **HW** ([Week11-HW/](Week11-HW/), `CSS326-Lab_Assignment_11.pdf`): the bookstore version.
-  - `place_order` procedure, `order_count` function, and stock-keeping triggers (Q1–Q4).
-  - Rewiring the API to use them (Q5).
-  - A JSON column for book `format` / `pages` with a format filter (Q6–Q7).
+### Week 11: Stored routines, triggers and JSON
+- **Stored procedures** (`IN`/`OUT` parameters) and **functions**, called from Node with `CALL`.
+- **Triggers** that keep counters up to date and block invalid changes with `SIGNAL`.
+- **JSON columns** for flexible data, with filtering on JSON fields.
+- Work: [Week11/](Week11/), [Week11-HW/](Week11-HW/) (`place_order` procedure, stock triggers, JSON book formats)
+
+## Repository layout
+
+- `WeekN/`: the in-class lab exercises.
+- `WeekN-HW/`: the homework assignment for that week. Week 8 has no homework.
+
+From Week 6 on, folders include the lab sheet PDFs and starter projects provided by the course instructor. The completed exercises and assignments are my own work.
 
 ## Running the code
 
-**Prerequisites:** Node.js and a local MySQL 8 server (MySQL Workbench is recommended).
+**Prerequisites:** Node.js and a local MySQL 8 server (MySQL Workbench recommended).
 
-**Weeks 1–5** are single scripts. Install the dependencies at the repo root once, then run any script:
+**Weeks 1–5** are single scripts. Install the dependencies at the repo root once:
 
 ```bash
 npm install
 ```
 
+Then run any script:
+
 ```bash
 node Week4/ex1.js
 ```
 
-For Weeks 4–5, first create the database by importing that week's `.sql` dump in Workbench. Then check the connection settings (`host`, `user`, `password`, `database`) at the top of the script.
+For Weeks 4–5, first import that week's `.sql` dump in Workbench and check the connection settings at the top of the script.
 
-**Weeks 6–11** are self-contained projects. Open the project folder, then:
+**Weeks 6–11** are self-contained projects. In the project folder:
 
-1. Run that week's SQL setup script(s) in MySQL Workbench. The starter `README.md` says which files to run and in what order.
-2. Put your MySQL login in `db.js`. From Week 10 on, it goes in `.env` instead (copy `.env.example`).
+1. Run that week's SQL setup script(s) in MySQL Workbench. The starter `README.md` lists the order.
+2. Put your MySQL login in `db.js`. From Week 10 on, use `.env` instead (copy `.env.example`).
 3. Install and start:
 
    ```bash
@@ -125,8 +139,8 @@ For Weeks 4–5, first create the database by importing that week's `.sql` dump 
    npm run dev
    ```
 
-   Week 6 uses `npm start` or `node app.js` instead.
+   Week 6 uses `npm start` instead.
 
-4. Open http://localhost:3000 for the front-end. You can also send the ready-made requests in `requests.http`.
+4. Open http://localhost:3000, or send the requests in `requests.http`.
 
 > `.env` files hold real passwords and are git-ignored. Don't commit them.
